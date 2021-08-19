@@ -1,8 +1,16 @@
 # GSoC (2021) - Gene Pair Orthology Prediction Using Deep Learning
 
+This project forms part of Google Summer of Code (GSoC) 2021 and is in collaboration with the Compara Project at the European Bioinformatics institute (EBI). All work in this repository was completed by myself as part of the GSoC, with feedback from colleagues at the EBI, and serves as a stable record of the work that was completed during GSoC 2021. Further work will continue after GSoC 2021, and will be pulled incorporated with the main [compara](https://github.com/EnsemblGSOC/compara-deep-learning) github repo on a continued basis.
+
+The primary objective of the project was achieved within the specified time of GSoC, namely to establish that deep learning is capable of categorising gene pairs into their evolutionary relationships with high accuracy. This was done using a set of convolutional neural networks, as detailed below, which were implemented using TensorFlow2.
+
+Further work to continue beyond this project are to: establish a "push-button" solution, capable of categorising a query gene pair using a trained network with a single command line argument; elaborate upon when precisely the networks miss-classifies gene pairs; and to identify which, if any, of the input features to the network can be removed without being detrimental to the networks final performance.
+
+In the rest of this readme, elucidate the project's goals, I describe the currently successful network architecture, and describe the network's input along with the pre-processing pipeline used to generate this input.
+
 ## Project Goal
 
-The aim of this project is to take pairs of genes from different species and predict the nature of their evolutionary relationship. Primarily, this concerns whether the genes are orthologs or paralogs (see: [here](https://useast.ensembl.org/info/genome/compara/homology_types.html)). The compara project at the EBI currently uses a method matches sequence similarity and the species tree to categorise gene pairs. Whilst it has proven successful in the past, the current methods do not scale as the number of comparison pairs increases. Thus, as the genomes of more species, the ability to assess the evlutionary relationship between genes is inhibited by the computational resources required for this task. 
+The aim of this project is to take pairs of genes from different species and predict the nature of their evolutionary relationship. Primarily, this concerns whether the genes are orthologs or paralogs (see: [here](https://useast.ensembl.org/info/genome/compara/homology_types.html)). The compara project at the EBI currently uses a method matches sequence similarity and the species tree to categorise gene pairs. Whilst it has proven successful in the past, the current methods do not scale well as the number of comparison pairs increases. Thus, as the genomes of more species are sequenced, the ability to assess the evlutionary relationship between genes is inhibited by the computational resources required for this task. 
 
 This project is a proof of principle that <em>deep learning</em> is capable of predicting orthology relationships with a high degree of accuracy between even distant species, with a view to demonstrating it's viability for predicting orthology at scale in a production setting. 
 
@@ -90,7 +98,7 @@ The three main file types are the <em>peptide</em> files which contain the prote
 
 ### Running the Pipeline
 
-Everything in the pipeline is controlled by the snakefile. Each rule of the snakefile can be seen earlier in the repo. Here is described what each rule does, in their order in the DAG, and what script in the scripts/ folder is required for each rule. Whilst snakemake implements each of these rules in turn, it simply strings together a sequence of bash and python scripts which are modularised such that one can in principle take the script and run each step separately without snakemake if desired. Some modification to the input output format for each script would be required to enable this to happen.
+Everything in the pipeline is controlled by the snakefile. Each rule of the snakefile can be seen earlier in the repo. Here is described what each rule does, in their order in the DAG, and what script in the scripts/ folder is required for each rule. Whilst snakemake implements each of these rules in turn, it simply strings together a sequence of bash and python scripts which are modularised such that one can in principle take the script and run each step separately without snakemake, if desired. Some modification to the input output format for each script would be required to enable this to happen.
 
 #### rule: select_longest
 
@@ -149,6 +157,17 @@ Once more, this is done separately for the "negative"/non-homologous pairs, by u
 
 script: Pfam_matrix_parallell_split.py & negative_Pfam_matrix_parallel_split.py
 
+#### rule: format_data
 
+Takes all of the outputs matrices for each species, the samples.csv files and combines them into a single large data set. The final datasets are labelled by date to keep track of progress. 
 
-## So what's in each of the matrices?
+#### rule: train_model
+
+Trains a neural network architecture to predict the homology classes. The model is written in TensorFlow2 using a combination of the Sequential and Functional APIs. The Sequential API is straightforward to use, but when non-standard details of the network need to be specified, the Functioanl API is required. 
+
+The trainer uses dataset generators to train the model, where only subsets of the data are read from disc at anyone time. This is because holding the entire, large training datasets in memory can be prohibitively costly. Whilst training, we iterate through the dataset, directly from disc. The model is then saved tf2 to the "Model_outputs" parameter specified within the config.json
+
+script: trainer.py
+
+#### rule: evaluate_model
+Using this we evaluate the models performance and save the figures at the specified output directory.
