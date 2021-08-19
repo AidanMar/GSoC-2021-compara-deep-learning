@@ -1,4 +1,5 @@
-{   "cluster_out_base_path":"/hps/software/users/ensembl/repositories/compara/amarshall/compara-deep-learning/pipeline3/reports",
+{   "species_file":"config/valid_species.txt",
+    "reports_out_base_path":"/hps/software/users/ensembl/repositories/compara/amarshall/compara-deep-learning/pipeline3/reports",
     "num_neighbours":3,
     "species_neighbour_outdir":"/nfs/production/flicek/ensembl/compara/amarshall/Data_Storage/Species_Neighbours",
     "Longest_pep_fasta_path":"/nfs/production/flicek/ensembl/compara/amarshall/Data_Storage/Longest_Gene_Fasta",
