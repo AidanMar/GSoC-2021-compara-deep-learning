@@ -24,24 +24,24 @@ Further details of each of these matrices can be found in the steps detailing th
 
 For each type of these feature matrices, the network has a separate CNN sub-module that learns a feature map for that matrix. (Each feature get's its own CNN because the features are so diverse there's no reason to for them to apply the same filters to each of these layers. All features are later joined in MLP layers to merge all of them together). Each CNN sub-module is visualised immediately below. The output of the sub-module is a fully connected MLP layer derived from the earlier CNN matrix values. 
 
-![alt text](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/CNN_model.png)
+![alt text](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/blob/master/CNN_model.png)
 
 The output for each sub-module is then concatanated to and fed into an MLP layer is seen below, which in turn is concatenated with the value of the species distance between the species containing the two comparison genes. All of these are then either fed into a two or three way softmax layer which is used to assign probabilities for the gene pairs orthology category. The two way classification could simply be ortholog vs paralog, whilst a three way classification task would be ortholog vs paralog vs non-homologous. The nodes in the first layer of the network are coloured by their feature type, and by extension, the CNN sub-module that they originated from (with only 5 input nodes representing the 50 for cleaner visualisation).
 
-![alt text](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/MLP_layers.png)
+![alt text](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/blob/master/MLP_layers.png)
 
 
 ## Snakemake  implementation
 
-The project is implemented in [snakemake](https://snakemake.readthedocs.io/en/stable/index.html) and makes use of a conda environment stored in a [yml](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/compara.yml) in this repo to ensure as much reproducibility as possible. Moreover, once this conda environment is installed, all packages required for running the pipeline from end to end should already be installed.
+The project is implemented in [snakemake](https://snakemake.readthedocs.io/en/stable/index.html) and makes use of a conda environment stored in a [yml](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/blob/master/compara.yml) in this repo to ensure as much reproducibility as possible. Moreover, once this conda environment is installed, all packages required for running the pipeline from end to end should already be installed.
 
 Snakemake allows us to specify a sequence of <em>rules</em> that can be used to transform input files into output files. By stringing many such rules together, snakemake allows us to elegantly formulate an entire data processing pipeline. Whilst the sequence of rules and transformations can be challenging to understand by reading a pipeline's script, the Directed Acyclic Graph of jobs that are used to go from raw input to output can be visualised to aid in in understanding the pipelines steps. An example of this can be seen here:
 
-![alt text](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/small_dag.png)
+![alt text](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/blob/master/small_dag.png)
 
-At first, this can be a little intimidating to view, however after a little thought it can be seen how much this visualisation aids in understanding the process by informing us which rules in the pipeline are dependent on which others before they run. An arrow from one rule to the next indicates the sequence in which a rule must be run. Moreover, once a rule has been established, it can further be generalised across multiple examples. For instance, above, the DAG is demonstrated for <em>neolamprologus brichardi</em>. But we can easily run the pipeline for multiple species, for example, the dag below generalises this to 3 species. We can in principle generalise the pipeline to as many species as we would like, provided that we have the necessary raw data and compute power to execute the pipeline. For the current demonstration, the pipleine was run with 56 species(the DAG can be seen [here](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/dag.png), though the image is very large).
+At first, this can be a little intimidating to view, however after a little thought it can be seen how much this visualisation aids in understanding the process by informing us which rules in the pipeline are dependent on which others before they run. An arrow from one rule to the next indicates the sequence in which a rule must be run. Moreover, once a rule has been established, it can further be generalised across multiple examples. For instance, above, the DAG is demonstrated for <em>neolamprologus brichardi</em>. But we can easily run the pipeline for multiple species, for example, the dag below generalises this to 3 species. We can in principle generalise the pipeline to as many species as we would like, provided that we have the necessary raw data and compute power to execute the pipeline. For the current demonstration, the pipleine was run with 56 species(the DAG can be seen [here](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/blob/master/dag.png), though the image is very large).
 
-![alt text](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/medium_dag.png)
+![alt text](https://github.com/AidanMar/GSoC-2021-compara-deep-learning/blob/master/medium_dag.png)
 
 ## The pipeline
 
